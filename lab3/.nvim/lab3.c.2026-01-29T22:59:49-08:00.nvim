@@ -1,0 +1,66 @@
+#define _POSIX_C_SOURCE 200809L
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define NUM 5
+
+void freeStrings(char **strings, int n) {
+  for (int i = 0; i < n; i++) {
+    free(strings[i]);
+    strings[i] = NULL;
+  }
+}
+
+void freeString(char **strings, int i) { free(strings[i]); }
+
+void printStrings(char **strings, int n) {
+  for (int i = 0; i < NUM; i++) {
+    if (strings[i] != NULL) {
+      printf("%s\n", strings[i]);
+    }
+  }
+}
+
+int saveString(char **strings, char *str, int i, int n) {
+  if (strings[i] != NULL) {
+    freeString(strings, i);
+  }
+
+  strings[i] = malloc(strlen(str) + 1);
+  strcpy(strings[i], str);
+
+  i++;
+  if (i == n) {
+    i = 0;
+  }
+  return i;
+}
+
+int main() {
+  char *buff = NULL;
+  size_t len = 0;
+
+  char *strings[NUM] = {NULL};
+  int indx = 0;
+
+  while (1) {
+    printf("Enter Input: ");
+    ssize_t num_char = getline(&buff, &len, stdin);
+
+    if (num_char > 0 && buff[num_char - 1] == '\n') {
+      buff[num_char - 1] = '\0';
+    } else {
+      exit(EXIT_FAILURE);
+    }
+
+    if (strcmp(buff, "print") == 0) {
+      printStrings(strings, NUM);
+      freeStrings(strings, NUM);
+    } else {
+      indx = saveString(strings, buff, indx, NUM);
+    }
+  }
+
+  freeStrings(strings, NUM);
+}
