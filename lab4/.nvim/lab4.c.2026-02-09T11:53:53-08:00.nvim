@@ -1,0 +1,32 @@
+#define _DEFAULT_SOURCE
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define BUF_SIZE 100
+
+void print_out(char *format, void *data, size_t data_size) {
+  char buf[BUF_SIZE];
+  ssize_t len = snprintf(buf, BUF_SIZE, format,
+                         data_size == sizeof(uint64_t) ? *(uint64_t *)data
+                                                       : *(void **)data);
+  if (len < 0) {
+    perror("snprintf");
+  }
+  write(STDOUT_FILENO, buf, len);
+}
+
+int main(void) {
+  void *p = sbrk(0);
+  void *q = sbrk(1);
+
+  if (q == (void *) -1) {
+    perror("sbrk");
+    return 1;
+  }
+
+  print_out("Old break: %p\n", p, sizeof(p));
+
+  return 0;
+}

@@ -1,0 +1,74 @@
+#define _DEFAULT_SOURCE
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#define BUF_SIZE 100
+
+struct header {
+  uint64_t size;
+  struct header *next;
+};
+
+void print_out(char *format, void *data, size_t data_size) {
+  char buf[BUF_SIZE];
+  ssize_t len = snprintf(buf, BUF_SIZE, format,
+                         data_size == sizeof(uint64_t) ? *(uint64_t *)data
+                                                       : *(void **)data);
+  if (len < 0) {
+    perror("snprintf");
+  }
+  write(STDOUT_FILENO, buf, len);
+}
+
+int check_sbrk(void *p) {
+  if (p == (void *)-1) {
+    perror("sbrk");
+    return 1;
+  }
+  return 0;
+}
+
+void print_bytes(void *p, int n) {
+  int i = 0;
+  while (i < n) {
+    print_out("%d: ", &i, sizeof(int));
+    print_out("%d\n", p, sizeof(&(p)));
+    p++;
+    i++;
+  }
+}
+
+int main(void) {
+  void *p = sbrk(256);
+  if (check_sbrk(p) == 1)
+    return 1;
+  void *inc = sbrk(0);
+
+  struct header *b1 = (struct header *)inc;
+  struct header *b2 = (struct header *)(inc + 128);
+
+  b1->next = NULL;
+  b1->size = 128;
+
+  b2->next = b1;
+  b2->size = 128;
+
+  void *data_b1 = (void *) (b1 + sizeof(struct header));
+  void *data_b2 = (void *) (b2 + sizeof(struct header));
+  memset(data_b1, 0, 128 - sizeof(struct header));
+  memset(data_b2, 1, 128 - sizeof(struct header));
+
+  print_out("first block: %p\n", &b1, sizeof(&b1));
+  print_out("second block: %p\n", &b2, sizeof(&b2));
+  print_out("first block size: %lu\n", &(b1->size), sizeof(&(b1->size)));
+  print_out("first block next: %p\n", &(b1->next), sizeof(&(b1->next)));
+  print_out("second block size: %lu\n", &(b2->size), sizeof(&(b2->size)));
+  print_out("second block next: %p\n", &(b2->next), sizeof(&(b2->next)));
+  print_bytes(data_b1, 128 - sizeof(struct header));
+  print_bytes(data_b2, 128 - sizeof(struct header));
+
+  return 0;
+}

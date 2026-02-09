@@ -1,0 +1,23 @@
+#define _POSIX_C_SOURCE 200809L
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define BUF_SIZE 100
+
+void print_out(char *format, void *data, size_t data_size) {
+  char buf[BUF_SIZE];
+  ssize_t len = snprintf(buf, BUF_SIZE, format, data_size == sizeof(uint64_t) ? *(uint64_t *)data : *(void **)data);
+  if (len < 0) {
+    exit(EXIT_FAILURE);
+  }
+  write(STDOUT_FILENO, buf, len);
+}
+
+int main(void) {
+  int waldo = 42;
+
+  print_out("Where is main? %p\n", &waldo, sizeof(&waldo));
+
+  return 0;
+}
