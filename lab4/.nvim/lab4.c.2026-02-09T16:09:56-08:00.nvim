@@ -31,11 +31,11 @@ int check_sbrk(void *p) {
   return 0;
 }
 
-void print_bytes(char *p, int n) {
+void print_bytes(void *p, int n) {
   char *q = p;
-  for (int i = 0; i < n; i++) {
+  for(int i = 0; i < n; i++) {
     print_out("%d: ", &i, sizeof(int));
-    print_out("%d\n", q + i, 1);
+    print_out("%d\n", &q[i], 1);
   }
 }
 

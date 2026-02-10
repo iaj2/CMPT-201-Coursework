@@ -31,11 +31,13 @@ int check_sbrk(void *p) {
   return 0;
 }
 
-void print_bytes(char *p, int n) {
-  char *q = p;
-  for (int i = 0; i < n; i++) {
+void print_bytes(void *p, int n) {
+  int i = 0;
+  while (i < n) {
     print_out("%d: ", &i, sizeof(int));
-    print_out("%d\n", q + i, 1);
+    print_out("%d\n", p, sizeof(&(p)));
+    p = p + sizeof(char);
+    i++;
   }
 }
 
@@ -53,8 +55,8 @@ int main(void) {
   b2->next = b1;
   b2->size = 128;
 
-  char *data_b1 = (char *)b1 + sizeof(struct header);
-  char *data_b2 = (char *)b2 + sizeof(struct header);
+  void *data_b1 = (char *)b1 + sizeof(struct header);
+  void *data_b2 = (char *)b2 + sizeof(struct header);
   memset(data_b1, 0, 128 - sizeof(struct header));
   memset(data_b2, 1, 128 - sizeof(struct header));
 
