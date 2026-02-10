@@ -31,6 +31,13 @@ int check_sbrk(void *p) {
   return 0;
 }
 
+void print_bytes(char *p, int n) {
+  char *q = p;
+  for (int i = 0; i < n; i++) {
+    print_out("%d\n", q + i, 1);
+  }
+}
+
 int main(void) {
   void *p = sbrk(256);
   if (check_sbrk(p) == 1)
@@ -48,6 +55,7 @@ int main(void) {
   char *data_b1 = (char *)b1 + sizeof(struct header);
   char *data_b2 = (char *)b2 + sizeof(struct header);
   memset(data_b1, 0, 128 - sizeof(struct header));
+  memset(data_b2, 1, 128 - sizeof(struct header));
 
   print_out("first block: %p\n", &b1, sizeof(&b1));
   print_out("second block: %p\n", &b2, sizeof(&b2));
@@ -55,11 +63,8 @@ int main(void) {
   print_out("first block next: %p\n", &(b1->next), sizeof(&(b1->next)));
   print_out("second block size: %lu\n", &(b2->size), sizeof(&(b2->size)));
   print_out("second block next: %p\n", &(b2->next), sizeof(&(b2->next)));
-
-  while (data_b1 != (char *)b2) {
-    print_out("%d\n", data_b1, 1);
-    data_b1++;
-  }
+  print_bytes(data_b1, 128 - sizeof(struct header));
+  print_bytes(data_b2, 128 - sizeof(struct header));
 
   return 0;
 }
