@@ -48,8 +48,7 @@ int main(void) {
   char *data_b1 = (char *)b1 + sizeof(struct header);
   char *data_b2 = (char *)b2 + sizeof(struct header);
 
-  memset(data_b1, 0, b1->size - sizeof(struct header));
-  memset(data_b2, 1, b2->size - sizeof(struct header));
+  memset(data_b1, 1, b1->size  - sizeof(struct header));
 
   print_out("first block: %p\n", &b1, sizeof(&b1));
   print_out("second block: %p\n", &b2, sizeof(&b2));
@@ -58,14 +57,10 @@ int main(void) {
   print_out("second block size: %lu\n", &(b2->size), sizeof(&(b2->size)));
   print_out("second block next: %p\n", &(b2->next), sizeof(&(b2->next)));
 
-  for (int i = 0; i < (b1->size - sizeof(struct header)); i++) {
-    printf("%u\n", *data_b1);
+  while (data_b1 != (char *)b2) {
+    print_out("%u\n", data_b1, 1);
     data_b1++;
   }
 
-  for (int i = 0; i < (b2->size - sizeof(struct header)); i++) {
-    printf("%u\n", *data_b2);
-    data_b2++;
-  }
   return 0;
 }

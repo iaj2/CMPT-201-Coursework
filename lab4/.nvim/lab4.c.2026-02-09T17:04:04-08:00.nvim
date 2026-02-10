@@ -58,12 +58,12 @@ int main(void) {
   print_out("second block size: %lu\n", &(b2->size), sizeof(&(b2->size)));
   print_out("second block next: %p\n", &(b2->next), sizeof(&(b2->next)));
 
-  for (int i = 0; i < (b1->size - sizeof(struct header)); i++) {
+  for(int i=0; i < (b1->size - sizeof(struct header)); i++) {
     printf("%u\n", *data_b1);
     data_b1++;
   }
 
-  for (int i = 0; i < (b2->size - sizeof(struct header)); i++) {
+  for(int i=0; i < (b2->size - sizeof(struct header)); i++) {
     printf("%u\n", *data_b2);
     data_b2++;
   }

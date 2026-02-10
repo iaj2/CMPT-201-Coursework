@@ -47,7 +47,9 @@ int main(void) {
 
   char *data_b1 = (char *)b1 + sizeof(struct header);
   char *data_b2 = (char *)b2 + sizeof(struct header);
-
+  print_out("first block: %p\n", &b1, sizeof(&b1));
+  print_out("second block: %p\n", &b2, sizeof(&b2));
+  
   memset(data_b1, 0, b1->size - sizeof(struct header));
   memset(data_b2, 1, b2->size - sizeof(struct header));
 
