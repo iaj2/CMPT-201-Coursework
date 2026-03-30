@@ -90,12 +90,15 @@ acceptor spawns up to four client threads that polls for messages and appends to
 the shared list.
  * LAST QUESTIONS:
  ** Non-blocking sockets:
- * - How? fcntl(fd, F_SETFL, flags | O_NONBLOCK) via set_non_blocking().
- * - Which? both the server socket (sfd in run_acceptor) and every client
+ * - How are sockets made non-blocking?
+ *   with fcntl(fd, F_SETFL, flags | O_NONBLOCK) via set_non_blocking().
+ * - What sockets are made non-blocking?
+ *   the server socket (sfd in run_acceptor) and every client
  *   socket (cfd in run_client).
- * - Why? so that accept() and read() return immediately with EAGAIN/EWOULDBLOCK
- *   instead of blocking forever. This lets each thread loop back and re-check
- *   its atomic_bool run flag, enabling a clean shutdown when main sets
+ * - Why are these sockets made non-blocking? What purpose does it serve?
+ *   The sockets are non-blocking so that accept() and read() return immediately with EAGAIN/EWOULDBLOCK
+ *   instead of blocking forever. This lets each thread loop  and re-check
+ *   its atomic_bool run flag, which allows for a clean shutdown when main sets
  *   run = false. With blocking sockets, the threads would be stuck in
  *   accept()/read() and could never observe the stop signal.
 */
@@ -269,9 +272,10 @@ static void *run_acceptor(void *args) {
         client_args[num_clients].list_handle = aargs->list_handle;
         client_args[num_clients].list_lock = aargs->list_lock;
 
-        // Launch a thread to handle this client
+        // Create a client thread
         pthread_create(&threads[num_clients], NULL, run_client,
                        &client_args[num_clients]);
+        // Increment client after making thread, makes more sense
         num_clients++;
       }
     }
@@ -283,7 +287,7 @@ static void *run_acceptor(void *args) {
   for (int i = 0; i < num_clients; i++) {
     // Signal client thread to stop
     client_args[i].run = false;
-    // Wait for client thread to finish (it closes cfd internally)
+    // Wait for client thread to finish
     pthread_join(threads[i], NULL);
   }
 
@@ -311,7 +315,7 @@ int main() {
   };
   pthread_create(&acceptor_thread, NULL, run_acceptor, &aargs);
 
-  // Busy-wait until all expected messages are received
+  // Wait until all expected messages are received
   while (true) {
     pthread_mutex_lock(&list_mutex);
     uint32_t count = list_handle.count;
