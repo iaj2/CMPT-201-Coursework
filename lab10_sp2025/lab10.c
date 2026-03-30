@@ -88,19 +88,17 @@ verifies collected == count and prints success or failure.
 main spawns one acceptor thread that polls for incoming connections. The
 acceptor spawns up to four client threads that polls for messages and appends to
 the shared list.
- * LAST QUESTIONS:
- ** Non-blocking sockets:
- * - How are sockets made non-blocking?
- *   with fcntl(fd, F_SETFL, flags | O_NONBLOCK) via set_non_blocking().
- * - What sockets are made non-blocking?
- *   the server socket (sfd in run_acceptor) and every client
- *   socket (cfd in run_client).
- * - Why are these sockets made non-blocking? What purpose does it serve?
- *   The sockets are non-blocking so that accept() and read() return immediately with EAGAIN/EWOULDBLOCK
- *   instead of blocking forever. This lets each thread loop  and re-check
- *   its atomic_bool run flag, which allows for a clean shutdown when main sets
- *   run = false. With blocking sockets, the threads would be stuck in
- *   accept()/read() and could never observe the stop signal.
+LAST QUESTIONS:
+- How are sockets made non-blocking?
+with fcntl(fd, F_SETFL, flags | O_NONBLOCK) via set_non_blocking().
+- What sockets are made non-blocking?
+the server socket (sfd in run_acceptor) and every client
+socket (cfd in run_client).
+- Why are these sockets made non-blocking? What purpose does it serve?
+The sockets are non-blocking so that accept() and read() return immediately with EAGAIN/EWOULDBLOCK
+ instead of blocking forever. This lets each thread loop  and re-check
+ its atomic_bool run flag, which allows for a clean shutdown. With blocking sockets, 
+ the threads would be stuck in accept() or read() and could never observe the stop signal.
 */
 
 #include <arpa/inet.h>
