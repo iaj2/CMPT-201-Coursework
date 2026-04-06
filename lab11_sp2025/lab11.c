@@ -71,6 +71,7 @@ int main() {
     return 1;
   }
   pubkey = PEM_read_PUBKEY(fp, NULL, NULL, NULL);
+  fclose(fp);
 
   // Verify each message
   for (int i = 0; i < 3; i++) {
@@ -111,18 +112,14 @@ int verify(const char *message_path, const char *sign_path, EVP_PKEY *pubkey) {
   // Look at: https://wiki.openssl.org/index.php/EVP_Signing_and_Verifying
 
   // 1. Read all data from the message_path into the message arrray
-  int msg_len;
-  for (msg_len = 0; message_path[msg_len] != '\0'; msg_len++) {
-    message[msg_len] = message_path[msg_len];
-  }
-  message[msg_len] = '\0';
+  FILE *f_msg = fopen(message_path, "rb");
+  int msg_len = fread(message, 1, MAX_FILE_SIZE, f_msg);
+  fclose(f_msg);
 
   // 2. Read all data from the sign_path into the signature array
-  int sign_len;
-  for (sign_len = 0; sign_path[sign_len] != '\0'; sign_len++) {
-    signature[sign_len] = sign_path[sign_len];
-  }
-  signature[sign_len] = '\0';
+  FILE *f_sign = fopen(sign_path, "rb");
+  int sign_len = fread(signature, 1, MAX_FILE_SIZE, f_sign);
+  fclose(f_sign);
 
   // 3. Allocate a new digest context using EVP_MD_CTX_new()
   EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
